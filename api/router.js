@@ -3,7 +3,8 @@ const {
     signup,
     signin,
     getusers,
-    getuser
+    getuser,
+    updateuser
 } = require("./controller");
 const {
     allowifloggedin,
@@ -18,9 +19,12 @@ router.post("/signup", signup);
 
 router.post("/signin", signin);
 
+router.get("/getuser/:userId", allowifloggedin, getuser);
+
 router.get("/getusers", allowifloggedin, grantAccess('readAny', 'profile'), getusers);
 
-router.get("/getuser/:userId", allowifloggedin, getuser);
+router.put("/updateuser/:userId", allowifloggedin, grantAccess('updateAny', 'profile'), updateuser);
+
 
 
 module.exports = router;
