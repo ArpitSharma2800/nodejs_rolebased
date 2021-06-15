@@ -131,8 +131,31 @@ module.exports = {
             res.status(200).json({
                 data: user
             });
-        } catch (error) {
-            next(error)
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({
+                success: 0,
+                message: "Error Message",
+            });
+        }
+    },
+    //update user by admin
+    updateuser: async (req, res, next) => {
+        try {
+            const update = req.body
+            const userId = req.params.userId;
+            await User.findByIdAndUpdate(userId, update);
+            const user = await User.findById(userId)
+            res.status(200).json({
+                data: user,
+                message: 'User has been updated'
+            });
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({
+                success: 0,
+                message: "Error Message",
+            });
         }
     }
 };
