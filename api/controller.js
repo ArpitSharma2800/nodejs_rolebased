@@ -25,6 +25,14 @@ module.exports = {
                 password,
                 role
             } = req.body
+            const user = await User.findOne({
+                email
+            });
+            console.log(user);
+            if (user) return res.status(403).json({
+                success: 0,
+                message: 'Email already exist'
+            });
             const hashedPassword = await hashPassword(password);
             const newUser = new User({
                 email,
@@ -32,7 +40,9 @@ module.exports = {
                 role: role || "basic"
             });
             const accessToken = jwt.sign({
-                userId: newUser._id
+                userId: newUser._id,
+                role: newUser.role,
+                email: newUser.email
             }, process.env.JWT_SECRET, {
                 expiresIn: "1d"
             });
@@ -61,7 +71,7 @@ module.exports = {
             const user = await User.findOne({
                 email
             });
-            console.log(user);
+            // console.log(user);
             if (!user) return res.status(404).json({
                 success: 0,
                 message: 'Email does not exist'
@@ -72,7 +82,9 @@ module.exports = {
                 message: 'Password is not correct'
             });
             const accessToken = jwt.sign({
-                userId: user._id
+                userId: user._id,
+                role: user.role,
+                email: user.email
             }, process.env.JWT_SECRET, {
                 expiresIn: "1d"
             });
@@ -82,7 +94,8 @@ module.exports = {
             res.status(200).json({
                 data: {
                     email: user.email,
-                    role: user.role
+                    role: user.role,
+                    _id: user._id
                 },
                 accessToken
             })
@@ -92,6 +105,34 @@ module.exports = {
                 success: 0,
                 message: "Error Message",
             });
+        }
+    },
+    //getusers
+    getusers: async (req, res) => {
+        try {
+            const users = await User.find({});
+            res.status(200).json({
+                data: users
+            });
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({
+                success: 0,
+                message: "Error Message",
+            });
+        }
+    },
+    //getuser
+    getuser: async (req, res, next) => {
+        try {
+            const userId = req.params.userId;
+            const user = await User.findById(userId);
+            if (!user) return next(new Error('User does not exist'));
+            res.status(200).json({
+                data: user
+            });
+        } catch (error) {
+            next(error)
         }
     }
 };
